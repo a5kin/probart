@@ -1,4 +1,6 @@
-# Probart
+Probart
+-------
+
 Probart is a helper library I use in my generative art experiments.
 
 It sits on top of PyCairo and NumPy. Nothing beneficial, only a
