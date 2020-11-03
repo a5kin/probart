@@ -8,6 +8,8 @@ import cairo
 import numpy as np
 from matplotlib.path import Path
 
+from utils import polar2vec
+
 
 class FractalPath:
     """Base class for recursive path generation."""
@@ -30,16 +32,9 @@ class FractalPath:
         self._subpaths = []
         self._global_paths = paths
 
-    @staticmethod
-    def _polar2vec(r, phi):
-        """Calculate Cartesian vector from polar coords."""
-        vx = r * math.cos(phi)
-        vy = -r * math.sin(phi)
-        return vx, vy
-
     def _move_by(self, r, phi):
         """Calculate new point moved by raduis/angle."""
-        vx, vy = self._polar2vec(r, phi)
+        vx, vy = polar2vec(r, phi)
         return self._x + vx, self._y + vy
 
     def _update_momentum(self):
@@ -102,7 +97,9 @@ class FractalPath:
 
             if random.random() < 0.08 and self._depth < 123333:
                 new_rho = self._rho[:]
-                new_rho[-1] = -new_rho[-1]
+                new_rho[-1] = new_rho[-1] * random.choice([-1, 1])
+                new_rho[-2] = new_rho[-2] * random.choice([-1, 1])
+                new_rho[-3] = new_rho[-3] * random.choice([-1, 1])
                 new_r = self._margin + 10 * random.random()
                 new_phi = new_rho[0] + math.pi / 2 * [1, -1][new_rho[0] > 0]
                 new_x, new_y = self._move_by(new_r, new_phi)
@@ -128,7 +125,8 @@ class FractalPath:
 
         self._global_paths.append(Path(points))
 
-        self._ctx.set_source_rgba(*self._color)
+        color = list(self._color[:3]) + [min(1, len(points) / 200)]
+        self._ctx.set_source_rgba(*color)
         self._ctx.move_to(*points[0])
         for point in points[1:]:
             self._ctx.line_to(*point)
@@ -174,7 +172,7 @@ if __name__ == "__main__":
         ]
         start_x = random.random() * WIDTH
         start_y = random.random() * HEIGHT
-        # start_x, start_y = FractalPath._polar2vec(r, phi)
+        # start_x, start_y = polar2vec(r, phi)
         # start_x += 512
         # start_y += 512
 
